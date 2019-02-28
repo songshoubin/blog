@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gdufe.dao.BlogtypeDao">
+
+    <resultMap id="blogtypeMap" type="com.gdufe.entity.Blogtype">
+        <id property="id" column="id"/> <!--id-->
+        <result property="typeName" column="typeName"/>  <!--博客类别-->
+        <result property="orderNum" column="orderNum"/>  <!--博客排序-->
+        <result property="user_id" column="user_id"/>  <!--user_id-->
+    </resultMap>
+
+
+    <select id="findById" parameterType="int" resultType="com.gdufe.entity.Blogtype">
+        select * from blogtype where id=#{id}
+    </select>
+
+    <select id="listAll" resultType="com.gdufe.entity.Blogtype">
+        SELECT * FROM blogtype where user_id=#{user_id}
+    </select>
+
+    <sql id="list_sql" >
+        SELECT * FROM blogtype where user_id=#{user_id}
+    </sql>
+
+    <select id="getTotalCount" parameterType="map" resultType="int">
+        select count(*) as num from( <include refid="list_sql"/> ) as ds
+    </select>
+
+    <select id="listByPage" parameterType="map" resultType="com.gdufe.entity.Blogtype">
+        <include refid="list_sql"/>
+        limit #{startIndex}, #{pageSize}
+    </select>
+
+    <insert id="add" keyProperty="id"  useGeneratedKeys="true" parameterType="com.gdufe.entity.Blogtype" >
+        insert into blogtype(  typeName, orderNum, user_id)
+            values(  #{typeName}, #{orderNum}, #{user_id} )
+    </insert>
+
+    <update id="updateById" parameterType="com.gdufe.entity.Blogtype">
+        update blogtype SET
+            typeName=#{typeName},orderNum=#{orderNum}
+            where id =#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        delete from blogtype where id=#{id}
+    </delete>
+
+    <select id="getBlogtypeList" parameterType="int" resultType="com.gdufe.entity.Blogtype">
+        SELECT blogtype.*,count(blog.id) as blogCount
+            FROM blog right join blogtype on blogtype.id=blog.type_id
+            where blog.user_id=#{user_id}
+            group by blog.type_id
+    </select>
+
+</mapper>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
+<script type="text/javascript" src="/static/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="/static/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>
+
+<table id="dgBlogger"></table>
+<div id="dgBlogger_toolbar" style="padding:3px">
+			<span>id:</span>
+			<input id="blogger_id" style="line-height:24px;border:1px solid #ccc">
+			<span>博主姓名:</span>
+			<input id="blogger_username" style="line-height:24px;border:1px solid #ccc">
+			<span>博主密码:</span>
+			<input id="blogger_password" style="line-height:24px;border:1px solid #ccc">
+			<span>博主信息:</span>
+			<input id="blogger_profile" style="line-height:24px;border:1px solid #ccc">
+			<span>博主昵称:</span>
+			<input id="blogger_nickname" style="line-height:24px;border:1px solid #ccc">
+			<span>博主签名:</span>
+			<input id="blogger_sign" style="line-height:24px;border:1px solid #ccc">
+			<span>博主头像路径:</span>
+			<input id="blogger_imagename" style="line-height:24px;border:1px solid #ccc">
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="doBloggerSearch()">查询</a>
+		<span>&nbsp;</span>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true"  onclick="openAddBloggerDialog()">增加</a>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="doBloggerMulitpleSelect()">多选</a>
+</div>
+
+<div id="dlgBlogger" class="easyui-dialog" closed="true" closable="false">
+	<form id="frmBlogger" method="post"  enctype="multipart/form-data">
+		<input type="hidden" name="id">
+		<table cellspacing="8px">
+			<tr>
+				<td>博主姓名</td>
+				<td>
+					<input type="text" name="username" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博主密码</td>
+				<td>
+					<input type="text" name="password" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博主信息</td>
+				<td>
+					<input type="text" name="profile" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博主昵称</td>
+				<td>
+					<input type="text" name="nickname" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博主签名</td>
+				<td>
+					<input type="text" name="sign" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博主头像路径</td>
+				<td>
+					<input type="file" class="easyui-filebox" name="imagefile" data-options="prompt:'请选择头像文件...'">
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+	
+<!-- 以href加载时，所有js、css不能放置在<head></head>内 -->
+<script type="text/javascript" >
+$(function(){
+	$('#dgBlogger').datagrid({
+	    url:'/admin/blogger/list.do',
+	    fit:true,
+	    columns:[[    
+	        {field:'ck',title:'ID',checkbox: true},
+	        {field:'id',title:'id',width:100},   
+	        {field:'username',title:'博主姓名',width:100},   
+	        {field:'password',title:'博主密码',width:100},   
+	        {field:'profile',title:'博主信息',width:100},   
+	        {field:'nickname',title:'博主昵称',width:100},   
+	        {field:'sign',title:'博主签名',width:100},   
+	        {field:'imagename',title:'博主头像路径',width:100},   
+	        {field:'xxx',title:'操作',width:100,formatter: function(value,row,index){
+				return "<a href='#' onclick='openModifyBloggerDialog("+row.id+")'>编辑</a> | <a href='#' onclick='delBlogger("+row.id+")'>删除</a>";
+			}
+		}
+	    ]],
+	    striped:true,
+	    // 显示分页工具条
+	    pagination:true,
+	    // 分页条位置
+	    pagePosition:"bottom",
+	    // 初始化页数
+	    pageNumber:1,
+	    // 每页显示多少条记录
+	    pageSize:3,
+	    pageList:[3,5,10],
+	    toolbar: '#dgBlogger_toolbar' //工具栏
+
+	}); 
+	
+	var pager_dgBlogger = $('#dgBlogger').datagrid().datagrid('getPager');
+	pager_dgBlogger.pagination({
+		buttons:[{
+			text:'多选',
+			iconCls:'icon-remove',
+			handler:function(){
+				doBloggerMulitpleSelect();
+			}
+		},{
+			text:'增加',
+			iconCls:'icon-add',
+			handler:function(){
+				openAddBloggerDialog();
+			}
+		}]
+	});			
+	
+	$('#dlgBlogger').dialog({
+		buttons: [{
+			text:'保存',
+			iconCls: 'icon-save',
+			handler: function(){
+				saveBlogger();
+			}
+	    	},
+			{
+	    		text:'关闭',
+				iconCls: 'icon-cancel',
+				handler: function(){
+					$('#dlgBlogger').dialog('close');
+				}
+			}
+	    ]
+
+	}); 
+
+});
+
+function doBloggerSearch(){
+	$('#dgBlogger').datagrid('load',{
+		id: $('#blogger_id').val() ,
+		username: $('#blogger_username').val() ,
+		password: $('#blogger_password').val() ,
+		profile: $('#blogger_profile').val() ,
+		nickname: $('#blogger_nickname').val() ,
+		sign: $('#blogger_sign').val() ,
+		imagename: $('#blogger_imagename').val() 
+	});
+}
+
+function doBloggerMulitpleSelect(){
+	var checkedItems = $('#dgBlogger').datagrid('getChecked');
+	var ids = [];
+	$.each(checkedItems, function(index, item){
+		ids.push(item.id);
+	});
+	alert(ids);
+}
+
+function delBlogger(id){
+	// 提交数据到Action
+	$.post("/admin/blogger/delete.do","id="+id, function(result) {
+			$.messager.show({
+				title:'提示信息',
+				msg:result.message,
+				timeout:3000,
+				showType:'slide'
+			});
+			$("#dgBlogger").datagrid("reload");
+		});
+}
+
+
+function openModifyBloggerDialog(id) {
+
+	$.post("/admin/blogger/modify.do","id="+id, function(data) {
+		    console.log(data);
+			$("#dlgBlogger").attr("method","Modify");
+			$("#frmBlogger input[name='id']").val(data.id); 
+			$("#frmBlogger input[name='username']").val(data.username); 
+			$("#frmBlogger input[name='password']").val(data.password); 
+			$("#frmBlogger input[name='profile']").val(data.profile); 
+			$("#frmBlogger input[name='nickname']").val(data.nickname); 
+			$("#frmBlogger input[name='sign']").val(data.sign); 
+			$("#frmBlogger input[name='imagename']").val(data.imagename); 
+			$("#dlgBlogger").dialog("setTitle", "修改博主");
+			$("#dlgBlogger").dialog("open");
+		});
+
+}
+
+function openAddBloggerDialog() {
+	$("#dlgBlogger").attr("method","Add");
+	
+	clearBloggerForm();
+	$("#dlgBlogger").dialog("setTitle", "添加博主");
+	$("#dlgBlogger").dialog("open");
+}
+
+//清空表单
+function clearBloggerForm(){
+	$("#frmBlogger input[name='id']").val('0'); 
+	$("#frmBlogger input[name='username']").val(''); 
+	$("#frmBlogger input[name='password']").val(''); 
+	$("#frmBlogger input[name='profile']").val(''); 
+	$("#frmBlogger input[name='nickname']").val(''); 
+	$("#frmBlogger input[name='sign']").val(''); 
+	$("#frmBlogger input[name='imagefile']").val(''); 
+	//$("typeName").val("");
+}
+
+function closeBloggerDialog() {
+	console.log($("#dlgBlogger").attr("method"));
+	
+	celearBloggerForm();
+	$("#dlgBlogger").dialog("close"); //关闭对话框
+}
+
+function saveBlogger() {
+	myurl="/admin/blogger/add_submit.do";
+	if('Modify' == $("#dlgBlogger").attr("method")){
+		myurl="/admin/blogger/modify_submit.do";		
+	}
+
+	//Ajax参数错误导致，上传文件的form我使用了jquery.form.js的form序列化，
+	//这样传输表单到后台很方便，但是二进制文件是无法用form.serialize()序列化的。	
+	console.log($("#frmBlogger").serialize());
+	
+	var formData = new FormData($("#frmBlogger")[0]);
+	console.log(formData);
+
+    $.ajax({  
+        type: "POST",  
+        url:myurl,  
+        data:formData, 
+        // 下面三个参数要指定，如果不指定，会报一个JQuery的错误 
+            cache: false,
+            contentType: false,
+           processData: false,
+        async: false,  
+        success: function(result) {  
+    		$.messager.show({
+			title:'提示信息',
+			msg:result.message,
+			timeout:3000,
+			showType:'slide'
+		});
+		$("#dlgBlogger").dialog("close"); //关闭对话框
+		$("#dgBlogger").datagrid("reload");
+        }  
+    }); 
+
+// 	$.post(myurl,$("#frmBlogger").serialize(), function(result) {
+// 		$.messager.show({
+// 			title:'提示信息',
+// 			msg:result.message,
+// 			timeout:3000,
+// 			showType:'slide'
+// 		});
+// 		$("#dlgBlogger").dialog("close"); //关闭对话框
+// 		$("#dgBlogger").datagrid("reload");
+// 	});
+	
+}
+
+</script>
+
+</body>
+</html>

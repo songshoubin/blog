@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
+<script type="text/javascript" src="/static/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="/static/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>
+
+<table id="dgComment"></table>
+<div id="dgComment_toolbar" style="padding:3px">
+			<span>id:</span>
+			<input id="comment_id" style="line-height:24px;border:1px solid #ccc">
+			<span>评论者的ip:</span>
+			<input id="comment_userIp" style="line-height:24px;border:1px solid #ccc">
+			<span>评论内容:</span>
+			<input id="comment_content" style="line-height:24px;border:1px solid #ccc">
+			<span>评论日期:</span>
+			<input id="comment_commentDate" style="line-height:24px;border:1px solid #ccc">
+			<span>审核状态:</span>
+			<input id="comment_state" style="line-height:24px;border:1px solid #ccc">
+			<span>外键关联具体博客:</span>
+			<input id="comment_blog_id" style="line-height:24px;border:1px solid #ccc">
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="doCommentSearch()">查询</a>
+		<span>&nbsp;</span>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true"  onclick="openAddCommentDialog()">增加</a>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="doCommentMulitpleSelect()">多选</a>
+</div>
+
+<div id="dlgComment" class="easyui-dialog" closed="true" closable="false" >
+	<form id="frmComment" method="post">
+		<input type="hidden" name="id">
+		<table cellspacing="8px">
+			<tr>
+				<td>评论者的ip</td>
+				<td>
+					<input type="text" name="userIp" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>评论内容</td>
+				<td>
+					<input type="text" name="content" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>评论日期</td>
+				<td>
+					<input type="text" name="commentDate" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>审核状态</td>
+				<td>
+					<input type="text" name="state" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>外键关联具体博客</td>
+				<td>
+					<input type="text" name="blog_id" class="easyui-validatebox">
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+	
+<!-- 以href加载时，所有js、css不能放置在<head></head>内 -->
+<script type="text/javascript" >
+$(function(){
+	$('#dgComment').datagrid({
+	    url:'/admin/comment/list.do',
+	    fit:true,
+	    columns:[[    
+	        {field:'ck',title:'ID',checkbox: true},
+	        {field:'id',title:'id',width:100},   
+	        {field:'userIp',title:'评论者的ip',width:100},   
+	        {field:'content',title:'评论内容',width:100},   
+	        {field:'commentDate',title:'评论日期',width:100},
+	        {field:'blog',title:'关联的博客标题',width:200,
+	        	formatter: function(value,row,index){
+	        		return row.blog.title;
+	        		}
+	        	},   
+		    {field:'state',title:'审核状态',width:200,
+		        	formatter: function(value,row,index){
+		        		if(row.state==0)
+		        			return "待审核";
+		        		else if (row.state==1)
+		        			return "通过";
+		        		else 
+		        			return "不通过";
+		        	}
+		    },   
+	        {field:'state',title:'审核状态',width:100},   
+//	        {field:'blog_id',title:'外键关联具体博客',width:100},   
+	        {field:'xxx',title:'操作',width:200,formatter: function(value,row,index){
+				return "<a href='#' onclick='doCommentReview("+row.id+",1)'>通过</a> | <a href='#' onclick='doCommentReview("+row.id+",2)'>拒绝</a>";
+			}
+		}
+	    ]],
+	    striped:true,
+	    // 显示分页工具条
+	    pagination:true,
+	    // 分页条位置
+	    pagePosition:"bottom",
+	    // 初始化页数
+	    pageNumber:1,
+	    // 每页显示多少条记录
+	    pageSize:3,
+	    pageList:[3,5,10],
+	    toolbar: '#dgComment_toolbar' //工具栏
+
+	}); 
+	
+	var pager_dgComment = $('#dgComment').datagrid().datagrid('getPager');
+	pager_dgComment.pagination({
+		buttons:[{
+			text:'多选',
+			iconCls:'icon-remove',
+			handler:function(){
+				doCommentMulitpleSelect();
+			}
+		},{
+			text:'增加',
+			iconCls:'icon-add',
+			handler:function(){
+				openAddCommentDialog();
+			}
+		}]
+	});			
+	
+	$('#dlgComment').dialog({
+		buttons: [{
+			text:'保存',
+			iconCls: 'icon-save',
+			handler: function(){
+				saveComment();
+			}
+	    	},
+			{
+	    		text:'关闭',
+				iconCls: 'icon-cancel',
+				handler: function(){
+					$('#dlgComment').dialog('close');
+				}
+			}
+	    ]
+
+	}); 
+
+});
+
+function doCommentSearch(){
+	$('#dgComment').datagrid('load',{
+		id: $('#comment_id').val() ,
+		userIp: $('#comment_userIp').val() ,
+		content: $('#comment_content').val() ,
+		commentDate: $('#comment_commentDate').val() ,
+		state: $('#comment_state').val() ,
+		blog_id: $('#comment_blog_id').val() 
+	});
+}
+
+function doCommentMulitpleSelect(){
+	var checkedItems = $('#dgComment').datagrid('getChecked');
+	var ids = [];
+	$.each(checkedItems, function(index, item){
+		ids.push(item.id);
+	});
+	alert(ids);
+}
+
+function delComment(id){
+	// 提交数据到Action
+	$.post("/admin/comment/delete.do","id="+id, function(result) {
+			$.messager.show({
+				title:'提示信息',
+				msg:result.message,
+				timeout:3000,
+				showType:'slide'
+			});
+			$("#dgComment").datagrid("reload");
+		});
+}
+
+
+function doCommentReview(id,state) {
+    //alert(id);
+	$.post("/admin/comment/review.do","id="+id+"&state="+state, function(result) {
+			$.messager.show({
+				title:'提示信息',
+				msg:result.message,
+				timeout:3000,
+				showType:'slide'
+			});
+			$("#dgComment").datagrid("reload");
+		});
+
+}
+
+function openAddCommentDialog() {
+	$("#dlgComment").attr("method","Add");
+	
+	clearCommentForm();
+	$("#dlgComment").dialog("setTitle", "添加评论");
+	$("#dlgComment").dialog("open");
+}
+
+//清空表单
+function clearCommentForm(){
+	$("#frmComment input[name='id']").val('0'); 
+	$("#frmComment input[name='userIp']").val(''); 
+	$("#frmComment input[name='content']").val(''); 
+	$("#frmComment input[name='commentDate']").val(''); 
+	$("#frmComment input[name='state']").val('0'); 
+	$("#frmComment input[name='blog_id']").val('0'); 
+	//$("typeName").val("");
+}
+
+function closeCommentDialog() {
+	console.log($("#dlgComment").attr("method"));
+	
+	celearCommentForm();
+	$("#dlgComment").dialog("close"); //关闭对话框
+}
+
+function saveComment() {
+	myurl="/admin/comment/add_submit.do";
+	if('Modify' == $("#dlgComment").attr("method")){
+		myurl="/admin/comment/modify_submit.do";		
+	}
+	
+	console.log($("#frmComment").serialize());
+	
+	$.post(myurl,$("#frmComment").serialize(), function(result) {
+		$.messager.show({
+			title:'提示信息',
+			msg:result.message,
+			timeout:3000,
+			showType:'slide'
+		});
+		$("#dlgComment").dialog("close"); //关闭对话框
+		$("#dgComment").datagrid("reload");
+	});
+	
+}
+
+</script>
+
+</body>
+</html>

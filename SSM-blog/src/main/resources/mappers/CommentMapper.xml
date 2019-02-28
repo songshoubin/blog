@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gdufe.dao.CommentDao">
+
+    <resultMap id="commentMap" type="com.gdufe.entity.Comment">
+        <id property="id" column="id"/> <!--id-->
+        <result property="userIp" column="userIp"/>  <!--评论者的ip-->
+        <result property="content" column="content"/>  <!--评论内容-->
+        <result property="commentDate" column="commentDate"/>  <!--评论日期-->
+        <result property="state" column="state"/>  <!--审核状态-->
+        <result property="blog_id" column="blog_id"/>  <!--外键关联具体博客-->
+        <association property="blog" javaType="com.gdufe.entity.Blog">
+            <id property="id" column="blog_id" />
+            <result property="title" column="title"/>
+        </association>
+    </resultMap>
+
+    <select id="findById" parameterType="int" resultType="com.gdufe.entity.Comment">
+        select * from comment where id=#{id}
+    </select>
+
+    <select id="listAll" resultType="com.gdufe.entity.Comment">
+        SELECT * FROM comment
+    </select>
+
+    <sql id="list_sql" >
+        select comment.*,
+        blog.title as title
+        from blog right JOIN comment on comment.blog_id = blog.id
+        where blog.user_id=#{user_id}
+    </sql>
+
+    <select id="getTotalCount" parameterType="map" resultType="int">
+        select count(*) as num from( <include refid="list_sql"/> ) as ds
+    </select>
+
+    <select id="listByPage" parameterType="map" resultMap="commentMap">
+        <include refid="list_sql"/>
+        limit #{startIndex}, #{pageSize}
+    </select>
+
+    <insert id="add" keyProperty="id"  useGeneratedKeys="true" parameterType="com.gdufe.entity.Comment" >
+        insert into comment(  userIp, content, commentDate, state, blog_id)
+            values(  #{userIp}, #{content}, #{commentDate}, #{state}, #{blog_id} )
+    </insert>
+
+    <update id="updateById" parameterType="com.gdufe.entity.Comment">
+        update comment SET
+            userIp=#{userIp},content=#{content},commentDate=#{commentDate},state=#{state},blog_id=#{blog_id}
+            where id =#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        delete from comment where id=#{id}
+    </delete>
+
+    <select id="getListByBlogId" parameterType="int" resultType="com.gdufe.entity.Comment">
+        SELECT * FROM comment where blog_id=#{blog_id} and state=1 ORDER BY commentDate asc;
+    </select>
+
+    <update id="review" >
+        update comment SET state=#{arg1}   where id =#{arg0}
+    </update>
+
+</mapper>

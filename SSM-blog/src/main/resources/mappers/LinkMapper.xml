@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gdufe.dao.LinkDao">
+
+    <resultMap id="linkMap" type="com.gdufe.entity.Link">
+        <id property="id" column="id"/> <!--id-->
+        <result property="linkname" column="linkname"/>  <!--友情链接名-->
+        <result property="linkurl" column="linkurl"/>  <!--友情链接url-->
+        <result property="orderNum" column="orderNum"/>  <!--链接排序-->
+    </resultMap>
+
+    <select id="findById" parameterType="int" resultType="com.gdufe.entity.Link">
+        select * from link where id=#{id}
+    </select>
+
+    <select id="listAll" resultType="com.gdufe.entity.Link">
+        SELECT * FROM link
+    </select>
+
+    <sql id="list_sql" >
+        SELECT * FROM link
+    </sql>
+
+    <select id="getTotalCount" parameterType="map" resultType="int">
+        select count(*) as num from( <include refid="list_sql"/> ) as ds
+    </select>
+
+    <select id="listByPage" parameterType="map" resultType="com.gdufe.entity.Link">
+        <include refid="list_sql"/>
+        limit #{startIndex}, #{pageSize}
+    </select>
+
+    <insert id="add" keyProperty="id"  useGeneratedKeys="true" parameterType="com.gdufe.entity.Link" >
+        insert into link(  linkname, linkurl, orderNum)
+            values(  #{linkname}, #{linkurl}, #{orderNum} )
+    </insert>
+
+    <update id="updateById" parameterType="com.gdufe.entity.Link">
+        update link SET
+            linkname=#{linkname},linkurl=#{linkurl},orderNum=#{orderNum}
+            where id =#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        delete from link where id=#{id}
+    </delete>
+
+</mapper>

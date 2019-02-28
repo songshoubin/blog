@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gdufe.dao.BlogDao">
+
+    <resultMap id="blogMap" type="com.gdufe.entity.Blog">
+        <id property="id" column="id"/> <!--id-->
+        <result property="title" column="title"/>  <!--博客题目-->
+        <result property="summary" column="summary"/>  <!--博客摘要-->
+        <result property="releaseDate" column="releaseDate"/>  <!--发布日期-->
+        <result property="clickHit" column="clickHit"/>  <!--评论次数-->
+        <result property="replyHit" column="replyHit"/>  <!--回复次数-->
+        <result property="content" column="content"/>  <!--博客内容-->
+        <result property="keyWord" column="keyWord"/>  <!--关键字-->
+        <result property="type_id" column="type_id"/>  <!--外键关联博客类别-->
+        <result property="user_id" column="user_id"/>  <!--外键关联博客用户-->
+        <association property="blogtype" javaType="com.gdufe.entity.Blogtype">
+            <id property="id" column="type_id"/>    <!--id-->
+            <result property="typeName" column="typeName"/>  <!--博客类别-->
+            <result property="orderNum" column="orderNum"/>  <!--博客排序-->
+            <result property="user_id" column="user_id"/>  <!--user_id-->
+        </association>
+    </resultMap>
+
+    <resultMap id="blogMapWithComment" type="com.gdufe.entity.Blog">
+        <id property="id" column="id"/> <!--id-->
+        <result property="title" column="title"/>  <!--博客题目-->
+        <result property="summary" column="summary"/>  <!--博客摘要-->
+        <result property="releaseDate" column="releaseDate"/>  <!--发布日期-->
+        <result property="clickHit" column="clickHit"/>  <!--评论次数-->
+        <result property="replyHit" column="replyHit"/>  <!--回复次数-->
+        <result property="content" column="content"/>  <!--博客内容-->
+        <result property="keyWord" column="keyWord"/>  <!--关键字-->
+        <result property="type_id" column="type_id"/>  <!--外键关联博客类别-->
+        <result property="user_id" column="user_id"/>  <!--外键关联博客用户-->
+        <association property="blogtype" javaType="com.gdufe.entity.Blogtype">
+            <id property="id" column="type_id"/>    <!--id-->
+            <result property="typeName" column="typeName"/>  <!--博客类别-->
+            <result property="orderNum" column="orderNum"/>  <!--博客排序-->
+            <result property="user_id" column="user_id"/>  <!--user_id-->
+        </association>
+        <collection property="comments" ofType="com.gdufe.entity.Comment">
+            <id property="id" column="comment_id"/> <!--id-->
+            <result property="userIp" column="userIp"/>  <!--评论者的ip-->
+            <result property="content" column="comment_content"/>  <!--评论内容-->
+            <result property="commentDate" column="commentDate"/>  <!--评论日期-->
+            <result property="state" column="state"/>  <!--审核状态-->
+            <!--<result property="blog_id" column="id"/> --> <!--外键关联具体博客-->
+        </collection>
+    </resultMap>
+
+
+    <select id="findById" parameterType="int" resultMap="blogMap">
+		select
+		        blog.*,
+                blogtype.typeName as typeName ,
+                blogtype.orderNum as orderNum
+		 from blog
+				LEFT JOIN blogtype on blog.type_id=blogtype.id
+		where blog.id=#{id}
+    </select>
+
+    <select id="findByIdWithComments" parameterType="int" resultMap="blogMapWithComment">
+            SELECT
+                blog.*,
+                blogtype.typeName as typeName ,
+                blogtype.orderNum as orderNum,
+
+               `comment`.id as comment_id ,
+                `comment`.userIp as userIp ,
+                `comment`.content as comment_content ,
+                `comment`.commentDate as commentDate ,
+                `comment`.state as state
+            FROM
+                blog
+            LEFT JOIN `comment` ON blog.id = `comment`.blog_id and `comment`.state=1
+                    LEFT JOIN blogtype on blog.type_id=blogtype.id
+            WHERE
+                blog.id =#{blog_id}
+      </select>
+
+
+    <select id="listAll" resultType="com.gdufe.entity.Blog">
+        SELECT * FROM blog
+    </select>
+
+    <sql id="list_sql">
+		select
+		        blog.*,
+                blogtype.typeName as typeName ,
+                blogtype.orderNum as orderNum
+		from blog LEFT JOIN blogtype on blog.type_id=blogtype.id
+		where blog.user_id=#{user_id}
+		<if test="typeId!=null">
+            and blog.type_id=#{typeId}
+        </if>
+        <if test="releaseDateStr!=null and releaseDateStr!=''">
+            and DATE_FORMAT(releaseDate,'%Y-%m')=#{releaseDateStr}
+        </if>
+		order by releaseDate DESC
+    </sql>
+
+    <select id="getTotalCount" parameterType="map" resultType="int">
+        select count(*) as num from(
+        <include refid="list_sql"/>
+        ) as ds
+    </select>
+
+    <select id="listByPage" parameterType="map" resultMap="blogMap">
+        <include refid="list_sql"/>
+        limit #{startIndex}, #{pageSize}
+    </select>
+
+    <insert id="add" keyProperty="id" useGeneratedKeys="true" parameterType="com.gdufe.entity.Blog">
+        insert into blog(  title, summary, releaseDate, clickHit, replyHit, content, keyWord, type_id, user_id)
+            values(  #{title}, #{summary}, #{releaseDate}, #{clickHit}, #{replyHit}, #{content}, #{keyWord}, #{type_id}, #{user_id} )
+    </insert>
+
+    <update id="updateById" parameterType="com.gdufe.entity.Blog">
+        update blog SET
+            title=#{title},summary=#{summary},releaseDate=#{releaseDate},clickHit=#{clickHit},replyHit=#{replyHit},content=#{content},keyWord=#{keyWord},type_id=#{type_id},user_id=#{user_id}
+            where id =#{id}
+    </update>
+
+    <update id="update2" parameterType="com.gdufe.entity.Blog">
+		update blog SET
+		    title=#{title},summary=#{summary},releaseDate=#{releaseDate},content=#{content},keyWord=#{keyWord},type_id=#{type_id}
+		where id =#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        delete from blog where id=#{id}
+    </delete>
+
+    <select id="getBlogTimeList" parameterType="int" resultType="map">
+		select DATE_FORMAT(releaseDate,'%Y-%m') as releaseDateStr,count(blog.id) as blogCount from blog
+		  where user_id= #{user_id}
+		  GROUP BY releaseDateStr
+		  ORDER BY releaseDateStr desc
+    </select>
+
+    <select id="getNextBlog" parameterType="int" resultType="com.gdufe.entity.Blog">
+        <![CDATA[
+		  select * from blog
+		    where id > #{id} and user_id=(select user_id from blog where id=#{id})
+		    order by id ASC limit 1
+        ]]>
+   </select>
+
+    <select id="getPrevBlog" parameterType="int" resultType="com.gdufe.entity.Blog">
+        <![CDATA[
+        select * from blog
+          where id < #{id} and user_id=(select user_id from blog where id=#{id})
+          order by id DESC limit 1
+        ]]>
+    </select>
+
+
+</mapper>

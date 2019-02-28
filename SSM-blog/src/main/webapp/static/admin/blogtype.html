@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
+<script type="text/javascript" src="/static/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="/static/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>
+
+<table id="dgBlogtype"></table>
+
+<div id="dlgBlogtype" class="easyui-dialog" closed="true" closable="false" >
+	<form id="frmBlogtype" method="post">
+		<input type="hidden" name="id">
+		<table cellspacing="8px">
+			<tr>
+				<td>博客类别</td>
+				<td>
+					<input type="text" name="typeName" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博客排序</td>
+				<td>
+					<input type="text" name="orderNum" class="easyui-validatebox">
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+	
+<!-- 以href加载时，所有js、css不能放置在<head></head>内 -->
+<script type="text/javascript" >
+$(function(){
+	$('#dgBlogtype').datagrid({
+	    url:'/admin/blogtype/list.do',
+	    fit:true,
+	    columns:[[    
+	        {field:'ck',title:'ID',checkbox: true},
+	        {field:'id',title:'id',width:100},   
+	        {field:'typeName',title:'博客类别',width:100},   
+	        {field:'orderNum',title:'博客排序',width:100},   
+	        {field:'xxx',title:'操作',width:100,formatter: function(value,row,index){
+				return "<a href='#' onclick='openModifyBlogtypeDialog("+row.id+")'>编辑</a> | <a href='#' onclick='delBlogtype("+row.id+")'>删除</a>";
+			}
+		}
+	    ]],
+	    striped:true,
+	    // 显示分页工具条
+	    pagination:true,
+	    // 分页条位置
+	    pagePosition:"bottom",
+	    // 初始化页数
+	    pageNumber:1,
+	    // 每页显示多少条记录
+	    pageSize:3,
+	    pageList:[3,5,10]
+
+	}); 
+	
+	var pager_dgBlogtype = $('#dgBlogtype').datagrid().datagrid('getPager');
+	pager_dgBlogtype.pagination({
+		buttons:[{
+			text:'多选',
+			iconCls:'icon-remove',
+			handler:function(){
+				doBlogtypeMulitpleSelect();
+			}
+		},{
+			text:'增加',
+			iconCls:'icon-add',
+			handler:function(){
+				openAddBlogtypeDialog();
+			}
+		}]
+	});			
+	
+	$('#dlgBlogtype').dialog({
+		buttons: [{
+			text:'保存',
+			iconCls: 'icon-save',
+			handler: function(){
+				saveBlogtype();
+			}
+	    	},
+			{
+	    		text:'关闭',
+				iconCls: 'icon-cancel',
+				handler: function(){
+					$('#dlgBlogtype').dialog('close');
+				}
+			}
+	    ]
+
+	}); 
+
+});
+
+
+function doBlogtypeMulitpleSelect(){
+	var checkedItems = $('#dgBlogtype').datagrid('getChecked');
+	var ids = [];
+	$.each(checkedItems, function(index, item){
+		ids.push(item.id);
+	});
+	alert(ids);
+}
+
+function delBlogtype(id){
+	// 提交数据到Action
+	$.post("/admin/blogtype/delete.do","id="+id, function(result) {
+			$.messager.show({
+				title:'提示信息',
+				msg:result.message,
+				timeout:3000,
+				showType:'slide'
+			});
+			$("#dgBlogtype").datagrid("reload");
+		});
+}
+
+
+function openModifyBlogtypeDialog(id) {
+
+	$.post("/admin/blogtype/modify.do","id="+id, function(data) {
+		    console.log(data);
+			$("#dlgBlogtype").attr("method","Modify");
+			$("#frmBlogtype input[name='id']").val(data.id); 
+			$("#frmBlogtype input[name='typeName']").val(data.typeName); 
+			$("#frmBlogtype input[name='orderNum']").val(data.orderNum); 
+			$("#dlgBlogtype").dialog("setTitle", "修改博客类型");
+			$("#dlgBlogtype").dialog("open");
+		});
+
+}
+
+function openAddBlogtypeDialog() {
+	$("#dlgBlogtype").attr("method","Add");
+	
+	clearBlogtypeForm();
+	$("#dlgBlogtype").dialog("setTitle", "添加博客类型");
+	$("#dlgBlogtype").dialog("open");
+}
+
+//清空表单
+function clearBlogtypeForm(){
+	$("#frmBlogtype input[name='id']").val('0'); 
+	$("#frmBlogtype input[name='typeName']").val(''); 
+	$("#frmBlogtype input[name='orderNum']").val('0'); 
+	//$("typeName").val("");
+}
+
+function closeBlogtypeDialog() {
+	console.log($("#dlgBlogtype").attr("method"));
+	
+	celearBlogtypeForm();
+	$("#dlgBlogtype").dialog("close"); //关闭对话框
+}
+
+function saveBlogtype() {
+	myurl="/admin/blogtype/add_submit.do";
+	if('Modify' == $("#dlgBlogtype").attr("method")){
+		myurl="/admin/blogtype/modify_submit.do";		
+	}
+	
+	console.log($("#frmBlogtype").serialize());
+	
+	$.post(myurl,$("#frmBlogtype").serialize(), function(result) {
+		$.messager.show({
+			title:'提示信息',
+			msg:result.message,
+			timeout:3000,
+			showType:'slide'
+		});
+		$("#dlgBlogtype").dialog("close"); //关闭对话框
+		$("#dgBlogtype").datagrid("reload");
+	});
+	
+}
+
+</script>
+
+</body>
+</html>

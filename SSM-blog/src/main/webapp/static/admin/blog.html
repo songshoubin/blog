@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
+<script type="text/javascript" src="/static/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="/static/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>
+
+<table id="dgBlog"></table>
+<div id="dgBlog_toolbar" style="padding:3px">
+			<span>id:</span>
+			<input id="blog_id" style="line-height:24px;border:1px solid #ccc">
+			<span>博客题目:</span>
+			<input id="blog_title" style="line-height:24px;border:1px solid #ccc">
+			<span>博客摘要:</span>
+			<input id="blog_summary" style="line-height:24px;border:1px solid #ccc">
+			<span>发布日期:</span>
+			<input id="blog_releaseDate" style="line-height:24px;border:1px solid #ccc">
+			<span>评论次数:</span>
+			<input id="blog_clickHit" style="line-height:24px;border:1px solid #ccc">
+			<span>回复次数:</span>
+			<input id="blog_replyHit" style="line-height:24px;border:1px solid #ccc">
+			<span>博客内容:</span>
+			<input id="blog_content" style="line-height:24px;border:1px solid #ccc">
+			<span>关键字:</span>
+			<input id="blog_keyWord" style="line-height:24px;border:1px solid #ccc">
+			<span>外键关联博客类别:</span>
+			<input id="blog_type_id" style="line-height:24px;border:1px solid #ccc">
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="doBlogSearch()">查询</a>
+		<span>&nbsp;</span>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true"  onclick="openAddBlogDialog()">增加</a>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="doBlogMulitpleSelect()">多选</a>
+</div>
+
+<div id="dlgBlog" class="easyui-dialog" closed="true" closable="false" >
+	<form id="frmBlog" method="post">
+		<input type="hidden" name="id">
+		<table cellspacing="8px">
+			<tr>
+				<td>博客题目</td>
+				<td>
+					<input type="text" name="title" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博客摘要</td>
+				<td>
+					<input type="text" name="summary" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>发布日期</td>
+				<td>
+					<input type="text" name="releaseDate" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>评论次数</td>
+				<td>
+					<input type="text" name="clickHit" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>回复次数</td>
+				<td>
+					<input type="text" name="replyHit" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>博客内容</td>
+				<td>
+					<input type="text" name="content" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>关键字</td>
+				<td>
+					<input type="text" name="keyWord" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>外键关联博客类别</td>
+				<td>
+					<input type="text" name="blogtype.typeName" class="easyui-validatebox">
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+	
+<!-- 以href加载时，所有js、css不能放置在<head></head>内 -->
+<script type="text/javascript" >
+$(function(){
+	$('#dgBlog').datagrid({
+	    url:'/admin/blog/list.do',
+	    fit:true,
+	    columns:[[    
+	        {field:'ck',title:'ID',checkbox: true},
+	        {field:'id',title:'id',width:100},   
+	        {field:'title',title:'博客题目',width:100},   
+	        {field:'summary',title:'博客摘要',width:100},   
+	        {field:'releaseDate',title:'发布日期',width:100},   
+	        {field:'clickHit',title:'评论次数',width:100},   
+	        {field:'replyHit',title:'回复次数',width:100},   
+//	        {field:'content',title:'博客内容',width:100},   
+	        {field:'keyWord',title:'关键字',width:100},   
+	        {field:'blogtype',title:'博客类别',width:100,
+	        	formatter: function(value,row,index){
+	        		return row.blogtype.typeName;
+	        		}
+	        	},   
+	        {field:'xxx',title:'操作',width:100,formatter: function(value,row,index){
+				return "<a href='#' onclick='openModifyBlogDialog("+index+","+row.id+")'>编辑</a> | <a href='#' onclick='delBlog("+row.id+")'>删除</a>";
+			}
+		}
+	    ]],
+	    striped:true,
+	    // 显示分页工具条
+	    pagination:true,
+	    // 分页条位置
+	    pagePosition:"bottom",
+	    // 初始化页数
+	    pageNumber:1,
+	    // 每页显示多少条记录
+	    pageSize:3,
+	    pageList:[3,5,10],
+	    toolbar: '#dgBlog_toolbar' //工具栏
+
+	}); 
+	
+	var pager_dgBlog = $('#dgBlog').datagrid().datagrid('getPager');
+	pager_dgBlog.pagination({
+		buttons:[{
+			text:'多选',
+			iconCls:'icon-remove',
+			handler:function(){
+				doBlogMulitpleSelect();
+			}
+		},{
+			text:'增加',
+			iconCls:'icon-add',
+			handler:function(){
+				openAddBlogDialog();
+			}
+		}]
+	});			
+	
+	$('#dlgBlog').dialog({
+		buttons: [{
+			text:'保存',
+			iconCls: 'icon-save',
+			handler: function(){
+				saveBlog();
+			}
+	    	},
+			{
+	    		text:'关闭',
+				iconCls: 'icon-cancel',
+				handler: function(){
+					$('#dlgBlog').dialog('close');
+				}
+			}
+	    ]
+
+	}); 
+
+});
+
+function doBlogSearch(){
+	$('#dgBlog').datagrid('load',{
+		id: $('#blog_id').val() ,
+		title: $('#blog_title').val() ,
+		summary: $('#blog_summary').val() ,
+		releaseDate: $('#blog_releaseDate').val() ,
+		clickHit: $('#blog_clickHit').val() ,
+		replyHit: $('#blog_replyHit').val() ,
+		content: $('#blog_content').val() ,
+		keyWord: $('#blog_keyWord').val() ,
+		type_id: $('#blog_type_id').val() 
+	});
+}
+
+function doBlogMulitpleSelect(){
+	var checkedItems = $('#dgBlog').datagrid('getChecked');
+	var ids = [];
+	$.each(checkedItems, function(index, item){
+		ids.push(item.id);
+	});
+	alert(ids);
+}
+
+function delBlog(id){
+	// 提交数据到Action
+	$.post("/admin/blog/delete.do","id="+id, function(result) {
+			$.messager.show({
+				title:'提示信息',
+				msg:result.message,
+				timeout:3000,
+				showType:'slide'
+			});
+			$("#dgBlog").datagrid("reload");
+		});
+}
+
+
+function openModifyBlogDialog(index,id) {
+	var rows = $('#dgBlog').datagrid('getRows');
+	console.log(index);
+	createTabsB(rows[index].title,"/admin/blog/writeBlog.do?id="+id);
+			///admin/blog/writeBlog.do createTabsB
+// 	$.post("/admin/blog/modify.do","id="+id, function(data) {
+// 		    console.log(data);
+// 			$("#dlgBlog").attr("method","Modify");
+// 			$("#frmBlog input[name='id']").val(data.id); 
+// 			$("#frmBlog input[name='title']").val(data.title); 
+// 			$("#frmBlog input[name='summary']").val(data.summary); 
+// 			$("#frmBlog input[name='releaseDate']").val(data.releaseDate); 
+// 			$("#frmBlog input[name='clickHit']").val(data.clickHit); 
+// 			$("#frmBlog input[name='replyHit']").val(data.replyHit); 
+// 			$("#frmBlog input[name='content']").val(data.content); 
+// 			$("#frmBlog input[name='keyWord']").val(data.keyWord); 
+// 			$("#frmBlog input[name='type_id']").val(data.type_id); 
+// 			$("#dlgBlog").dialog("setTitle", "修改博客");
+// 			$("#dlgBlog").dialog("open");
+// 		});
+
+}
+
+function openAddBlogDialog() {
+	$("#dlgBlog").attr("method","Add");
+	
+	clearBlogForm();
+	$("#dlgBlog").dialog("setTitle", "添加博客");
+	$("#dlgBlog").dialog("open");
+}
+
+//清空表单
+function clearBlogForm(){
+	$("#frmBlog input[name='id']").val('0'); 
+	$("#frmBlog input[name='title']").val(''); 
+	$("#frmBlog input[name='summary']").val(''); 
+	$("#frmBlog input[name='releaseDate']").val(''); 
+	$("#frmBlog input[name='clickHit']").val('0'); 
+	$("#frmBlog input[name='replyHit']").val('0'); 
+	$("#frmBlog input[name='content']").val(''); 
+	$("#frmBlog input[name='keyWord']").val(''); 
+	$("#frmBlog input[name='type_id']").val('0'); 
+	//$("typeName").val("");
+}
+
+function closeBlogDialog() {
+	console.log($("#dlgBlog").attr("method"));
+	
+	celearBlogForm();
+	$("#dlgBlog").dialog("close"); //关闭对话框
+}
+
+function saveBlog() {
+	myurl="/admin/blog/add_submit.do";
+	if('Modify' == $("#dlgBlog").attr("method")){
+		myurl="/admin/blog/modify_submit.do";		
+	}
+	
+	console.log($("#frmBlog").serialize());
+	
+	$.post(myurl,$("#frmBlog").serialize(), function(result) {
+		$.messager.show({
+			title:'提示信息',
+			msg:result.message,
+			timeout:3000,
+			showType:'slide'
+		});
+		$("#dlgBlog").dialog("close"); //关闭对话框
+		$("#dgBlog").datagrid("reload");
+	});
+	
+}
+
+</script>
+
+</body>
+</html>

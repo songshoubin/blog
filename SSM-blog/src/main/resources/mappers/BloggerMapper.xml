@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gdufe.dao.BloggerDao">
+
+    <resultMap id="bloggerMap" type="com.gdufe.entity.Blogger">
+        <id property="id" column="id"/> <!--id-->
+        <result property="username" column="username"/>  <!--博主姓名-->
+        <result property="password" column="password"/>  <!--博主密码-->
+        <result property="profile" column="profile"/>  <!--博主信息-->
+        <result property="nickname" column="nickname"/>  <!--博主昵称-->
+        <result property="sign" column="sign"/>  <!--博主签名-->
+        <result property="imagename" column="imagename"/>  <!--博主头像路径-->
+    </resultMap>
+
+    <select id="findById" parameterType="int" resultType="com.gdufe.entity.Blogger">
+        select * from blogger where id=#{id}
+    </select>
+
+    <select id="findByName" parameterType="String" resultType="com.gdufe.entity.Blogger">
+        select * from blogger where username=#{blogger_name}
+    </select>
+
+    <select id="listAll" resultType="com.gdufe.entity.Blogger">
+        SELECT * FROM blogger
+    </select>
+
+    <sql id="list_sql" >
+        SELECT * FROM blogger
+    </sql>
+
+    <select id="getTotalCount" parameterType="map" resultType="int">
+        select count(*) as num from( <include refid="list_sql"/> ) as ds
+    </select>
+
+    <select id="listByPage" parameterType="map" resultType="com.gdufe.entity.Blogger">
+        <include refid="list_sql"/>
+        limit #{startIndex}, #{pageSize}
+    </select>
+
+    <insert id="add" keyProperty="id"  useGeneratedKeys="true" parameterType="com.gdufe.entity.Blogger" >
+        insert into blogger(  username, password, profile, nickname, sign, imagename)
+            values(  #{username}, #{password}, #{profile}, #{nickname}, #{sign}, #{imagename} )
+    </insert>
+
+    <update id="updateById" parameterType="com.gdufe.entity.Blogger">
+        update blogger SET
+            username=#{username},password=#{password},profile=#{profile},nickname=#{nickname},sign=#{sign},imagename=#{imagename}
+            where id =#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        delete from blogger where id=#{id}
+    </delete>
+
+    <select id="verify" resultType="com.gdufe.entity.Blogger">
+        select * from blogger where username=#{username} and password=#{password}
+    </select>
+
+</mapper>

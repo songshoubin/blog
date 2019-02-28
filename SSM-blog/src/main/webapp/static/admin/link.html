@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
+<script type="text/javascript" src="/static/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="/static/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+</head>
+<body>
+
+<table id="dgLink"></table>
+<div id="dgLink_toolbar" style="padding:3px">
+			<span>id:</span>
+			<input id="link_id" style="line-height:24px;border:1px solid #ccc">
+			<span>友情链接名:</span>
+			<input id="link_linkname" style="line-height:24px;border:1px solid #ccc">
+			<span>友情链接url:</span>
+			<input id="link_linkurl" style="line-height:24px;border:1px solid #ccc">
+			<span>链接排序:</span>
+			<input id="link_orderNum" style="line-height:24px;border:1px solid #ccc">
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="doLinkSearch()">查询</a>
+		<span>&nbsp;</span>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true"  onclick="openAddLinkDialog()">增加</a>
+	<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="doLinkMulitpleSelect()">多选</a>
+</div>
+
+<div id="dlgLink" class="easyui-dialog" closed="true" closable="false" >
+	<form id="frmLink" method="post">
+		<input type="hidden" name="id">
+		<table cellspacing="8px">
+			<tr>
+				<td>友情链接名</td>
+				<td>
+					<input type="text" name="linkname" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>友情链接url</td>
+				<td>
+					<input type="text" name="linkurl" class="easyui-validatebox">
+				</td>
+			</tr>
+			<tr>
+				<td>链接排序</td>
+				<td>
+					<input type="text" name="orderNum" class="easyui-validatebox">
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+	
+<!-- 以href加载时，所有js、css不能放置在<head></head>内 -->
+<script type="text/javascript" >
+$(function(){
+	$('#dgLink').datagrid({
+	    url:'/admin/link/list.do',
+	    fit:true,
+	    columns:[[    
+	        {field:'ck',title:'ID',checkbox: true},
+	        {field:'id',title:'id',width:100},   
+	        {field:'linkname',title:'友情链接名',width:100},   
+	        {field:'linkurl',title:'友情链接url',width:100},   
+	        {field:'orderNum',title:'链接排序',width:100},   
+	        {field:'xxx',title:'操作',width:100,formatter: function(value,row,index){
+				return "<a href='#' onclick='openModifyLinkDialog("+row.id+")'>编辑</a> | <a href='#' onclick='delLink("+row.id+")'>删除</a>";
+			}
+		}
+	    ]],
+	    striped:true,
+	    // 显示分页工具条
+	    pagination:true,
+	    // 分页条位置
+	    pagePosition:"bottom",
+	    // 初始化页数
+	    pageNumber:1,
+	    // 每页显示多少条记录
+	    pageSize:3,
+	    pageList:[3,5,10],
+	    toolbar: '#dgLink_toolbar' //工具栏
+
+	}); 
+	
+	var pager_dgLink = $('#dgLink').datagrid().datagrid('getPager');
+	pager_dgLink.pagination({
+		buttons:[{
+			text:'多选',
+			iconCls:'icon-remove',
+			handler:function(){
+				doLinkMulitpleSelect();
+			}
+		},{
+			text:'增加',
+			iconCls:'icon-add',
+			handler:function(){
+				openAddLinkDialog();
+			}
+		}]
+	});			
+	
+	$('#dlgLink').dialog({
+		buttons: [{
+			text:'保存',
+			iconCls: 'icon-save',
+			handler: function(){
+				saveLink();
+			}
+	    	},
+			{
+	    		text:'关闭',
+				iconCls: 'icon-cancel',
+				handler: function(){
+					$('#dlgLink').dialog('close');
+				}
+			}
+	    ]
+
+	}); 
+
+});
+
+function doLinkSearch(){
+	$('#dgLink').datagrid('load',{
+		id: $('#link_id').val() ,
+		linkname: $('#link_linkname').val() ,
+		linkurl: $('#link_linkurl').val() ,
+		orderNum: $('#link_orderNum').val() 
+	});
+}
+
+function doLinkMulitpleSelect(){
+	var checkedItems = $('#dgLink').datagrid('getChecked');
+	var ids = [];
+	$.each(checkedItems, function(index, item){
+		ids.push(item.id);
+	});
+	alert(ids);
+}
+
+function delLink(id){
+	// 提交数据到Action
+	$.post("/admin/link/delete.do","id="+id, function(result) {
+			$.messager.show({
+				title:'提示信息',
+				msg:result.message,
+				timeout:3000,
+				showType:'slide'
+			});
+			$("#dgLink").datagrid("reload");
+		});
+}
+
+
+function openModifyLinkDialog(id) {
+
+	$.post("/admin/link/modify.do","id="+id, function(data) {
+		    console.log(data);
+			$("#dlgLink").attr("method","Modify");
+			$("#frmLink input[name='id']").val(data.id); 
+			$("#frmLink input[name='linkname']").val(data.linkname); 
+			$("#frmLink input[name='linkurl']").val(data.linkurl); 
+			$("#frmLink input[name='orderNum']").val(data.orderNum); 
+			$("#dlgLink").dialog("setTitle", "修改友情链接");
+			$("#dlgLink").dialog("open");
+		});
+
+}
+
+function openAddLinkDialog() {
+	$("#dlgLink").attr("method","Add");
+	
+	clearLinkForm();
+	$("#dlgLink").dialog("setTitle", "添加友情链接");
+	$("#dlgLink").dialog("open");
+}
+
+//清空表单
+function clearLinkForm(){
+	$("#frmLink input[name='id']").val('0'); 
+	$("#frmLink input[name='linkname']").val(''); 
+	$("#frmLink input[name='linkurl']").val(''); 
+	$("#frmLink input[name='orderNum']").val('0'); 
+	//$("typeName").val("");
+}
+
+function closeLinkDialog() {
+	console.log($("#dlgLink").attr("method"));
+	
+	celearLinkForm();
+	$("#dlgLink").dialog("close"); //关闭对话框
+}
+
+function saveLink() {
+	myurl="/admin/link/add_submit.do";
+	if('Modify' == $("#dlgLink").attr("method")){
+		myurl="/admin/link/modify_submit.do";		
+	}
+	
+	console.log($("#frmLink").serialize());
+	
+	$.post(myurl,$("#frmLink").serialize(), function(result) {
+		$.messager.show({
+			title:'提示信息',
+			msg:result.message,
+			timeout:3000,
+			showType:'slide'
+		});
+		$("#dlgLink").dialog("close"); //关闭对话框
+		$("#dgLink").datagrid("reload");
+	});
+	
+}
+
+</script>
+
+</body>
+</html>

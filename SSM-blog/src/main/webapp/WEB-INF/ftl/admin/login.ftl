@@ -234,7 +234,6 @@ a {
 			</DIV>
 		</DIV>
 	</form>
-	<div style="text-align:center;padding-top: 30px">Copyright ©
-		2018  个人博客系统  广东财经大学信息学院 版权所有  </div>
+	<div style="text-align:center;padding-top: 30px">Copyright © 2018song个人博客系统  版权所有  </div>
 </body>
 </html>

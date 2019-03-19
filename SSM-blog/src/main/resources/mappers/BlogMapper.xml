@@ -93,6 +93,9 @@
 		<if test="typeId!=null">
             and blog.type_id=#{typeId}
         </if>
+        <if test="keyword!=null">
+            and blog.KeyWord like #{keyword}
+        </if>
         <if test="releaseDateStr!=null and releaseDateStr!=''">
             and DATE_FORMAT(releaseDate,'%Y-%m')=#{releaseDateStr}
         </if>

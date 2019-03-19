@@ -47,7 +47,6 @@ public class BlogService {
         Integer total= mapper.getTotalCount(params);
         page.setTotal(total);
         page.addQueryParam(params);
-
         page.setRows(mapper.listByPage(params));
         return page;
     }

@@ -126,7 +126,7 @@
 		</div>
 		<!--3. 底栏-->
 		<div data-options="region:'south',split:false" style="height: 45px">
-			<p align="center">@copyright 广东财经大学信息学院 2018-9</p>
+			<p align="center">Copyright © 2018song个人博客系统  版权所有</p>
 		</div>
 		<!--4. 主界面-->
 		<div data-options="region:'center'">

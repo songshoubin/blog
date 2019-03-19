@@ -2,7 +2,7 @@
   		<div class="data_list_title">
 			<img src="/static/images/list_icon.png"/>&nbsp;最新博客
 		</div>	
-		<div class="datas"> ###${page.rows?size} 
+		<div class="datas"> 
 			<ul>	
 				<#list page.rows as blog>
 					<li style="margin-bottom: 30px">

@@ -21,7 +21,7 @@
 	        <li><a class="navbar-brand" href="#" onclick="changeClass(this)">关于博主</a></li>
 	        <li><a class="navbar-brand" href="#" onclick="changeClass(this)">我的相册</a></li>
 	      </ul>
-	      <form action="/blog/search.html" class="navbar-form navbar-right" role="search" method="post" onsubmit="return checkData()">
+	      <form action="./index" class="navbar-form navbar-right" role="search" method="post" onsubmit="return checkData()">
 	        <div class="form-group">
 	          <input type="text" id="q" name="q" value="${q}" class="form-control" placeholder="请输入要查询的关键字">
 	        </div>

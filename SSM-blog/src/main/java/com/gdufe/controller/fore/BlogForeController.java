@@ -46,14 +46,16 @@ public class BlogForeController {
 	@Resource
 	private LinkService linkService;
 	
-	// 请求博客详细信息
+	// 首页请求当前用户的博客详细信息
 	@RequestMapping({"/{blogger_name}/index","/{blogger_name}/"})
 	public String index(@PathVariable(required=true) String blogger_name,
 			@RequestParam(required = false)Integer page,
 			@RequestParam(required = false) String typeId,
 			@RequestParam(required = false) String releaseDateStr,
+			@RequestParam(required = false) String q,
 			HttpServletRequest request, Map model) {
 		model.put("contentPage", "bloglist.ftl");
+		model.put("blogger_name", "blogger_name");
 		
 //		Map params=request.getParameterMap();
 //		for(Object key: params.keySet()) {
@@ -72,6 +74,10 @@ public class BlogForeController {
 		
 		Map cond=new HashMap();
 		cond.put("user_id", blogger.getId());
+		//关键字不为空,用作模糊查询
+		if(q!=null){
+			cond.put("keyword", "%"+q+"%");
+		}
 		//支持更复杂的查询条件
 		if(typeId!=null) cond.put("typeId", typeId);
 		if(releaseDateStr!=null) cond.put("releaseDateStr", releaseDateStr);
@@ -85,7 +91,6 @@ public class BlogForeController {
 			List<String> imageList = new ArrayList<String>();
 			String blogInfo = blog.getContent(); //获取博客内容
 			Document doc = Jsoup.parse(blogInfo); //将博客内容(网页中也就是一些html)转为jsoup的Document
-//			Elements jpgs = doc.select("img[src$=.jpg]");//获取<img>标签中所有后缀是.jpg的元素
 			Elements jpgs = doc.select("img");//获取<img>标签中所有后缀是.jpg的元素
 			for(int i = 0; i < jpgs.size() && i<3; i++) {
 				Element jpg = jpgs.get(i); //获取到单个元素    //只存三张图片信息
@@ -109,7 +114,7 @@ public class BlogForeController {
 		return "/fore/mainTemp";
 	}
 	
-	// 请求博客详细信息
+	// 请求某条博客详细信息
 	@RequestMapping("/{blogger_name}/{id}")
 	public String details(@PathVariable(required=true) String blogger_name,@PathVariable Integer id, HttpServletRequest request, Map model) {
 		// 获取博主信息

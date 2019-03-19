@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@Transactional
+@Transactional//给整个类加事务管理
 public class BlogtypeService {
 
     @Autowired

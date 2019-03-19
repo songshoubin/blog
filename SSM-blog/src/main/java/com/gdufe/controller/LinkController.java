@@ -1,10 +1,16 @@
 package com.gdufe.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.gdufe.entity.Blogger;
 import com.gdufe.entity.Link;
 import com.gdufe.beans.PageBean;
 import com.gdufe.beans.ResultBean;
@@ -23,8 +29,11 @@ public class LinkController {
 	 */
 	//接收easyui datagrid的分页数据请求,page为第几页，rows为每页多少行
 	@RequestMapping("list.do")
-	public PageBean list(Integer page,Integer rows) {
-		return  service.listByPage(page,rows,null);
+	public PageBean list(Integer page,Integer rows,HttpSession session) {
+		Blogger user = (Blogger) session.getAttribute("user");
+		Map cond=new HashMap();
+		cond.put("user_id", user.getId());
+		return  service.listByPage(page,rows,cond);
 	}
 	
 	/**

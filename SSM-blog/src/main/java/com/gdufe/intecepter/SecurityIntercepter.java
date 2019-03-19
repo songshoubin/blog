@@ -1,5 +1,7 @@
 package com.gdufe.intecepter;
 
+import java.io.PrintWriter;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -25,6 +27,7 @@ public class SecurityIntercepter implements HandlerInterceptor{
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
+
 		System.out.println("***** preHandle**************");
 		HttpSession session = request.getSession();
 		if(session.getAttribute("user")==null){

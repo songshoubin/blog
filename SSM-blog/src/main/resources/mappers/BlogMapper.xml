@@ -123,7 +123,7 @@
 
     <update id="update2" parameterType="com.gdufe.entity.Blog">
 		update blog SET
-		    title=#{title},summary=#{summary},releaseDate=#{releaseDate},content=#{content},keyWord=#{keyWord},type_id=#{type_id}
+		    title=#{title},summary=#{summary},releaseDate=#{releaseDate},content=#{content},keyWord=#{keyWord},type_id=#{type_id},clickHit=#{clickHit}
 		where id =#{id}
     </update>
 

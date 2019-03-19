@@ -112,26 +112,20 @@ public class BlogForeController {
 	// 请求博客详细信息
 	@RequestMapping("/{blogger_name}/{id}")
 	public String details(@PathVariable(required=true) String blogger_name,@PathVariable Integer id, HttpServletRequest request, Map model) {
-
+		// 获取博主信息
 		Blogger blogger=bloggerService.findByName(blogger_name);
 		model.put("blogger", blogger);
 
-//		// 获取博主信息
-//		Blog blog = blogService.findById(id); // 根据id获取博客
-//		model.put("blog", blog);
-//		model.put("contentPage", "blogDetail.ftl");
-//
-////		// 查询评论信息
-//		Map tj=new HashMap();
-//		tj.put("blogId", blog.getId());
-//		tj.put("state", 1);
-//		List<Comment> commentList = commentService.getListByBlogId(blog.getId());
-//		model.put("commentList", commentList);
+		
+		Blog blog = blogService.findById(id); // 根据id获取博客
+		
 
-		Blog blog = blogService.findByIdWithComments(id);
-		model.put("blog", blog);
-		model.put("contentPage", "blogDetail.ftl");
-		model.put("commentList", blog.getComments());
+//		// 查询评论信息
+		Map tj=new HashMap();
+		tj.put("blogId", blog.getId());
+		tj.put("state", 1);
+		List<Comment> commentList = commentService.getListByBlogId(blog.getId());
+		model.put("commentList", commentList);
 
 		//存入上一篇和下一篇的显示代码
 		Blog prevBlog=blogService.getPrevBlog(id);
@@ -147,10 +141,12 @@ public class BlogForeController {
 		// 获取友情链接信息
 		List<Link> linkList = linkService.listAll();
 		model.put("linkList", linkList);
-		
-//		blog.setClickHit(blog.getClickHit() + 1); // 将博客访问量加1
-//		blogService.update(blog); // 更新博客
-		
+		blog.setClickHit(blog.getClickHit() + 1); // 将博客访问量加1  考虑加锁
+		// 更新博客,阅读量加1
+		blogService.update2(blog);
+		//修改blog后再返回
+		model.put("blog", blog);
+		model.put("contentPage", "blogDetail.ftl");
 		return "/fore/mainTemp";
 	}
 

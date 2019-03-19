@@ -19,9 +19,9 @@
 	
 					  	</span>
 					  	<span class="info">
-					  		<font color="#999">${blog.releaseDate }</font> &nbsp;&nbsp;
-					  		<font color="#33a5ba"><a href="/blog/${blog.id}.do">阅读</a><font color="#999">(${blog.clickHit })</font>&nbsp;&nbsp;</font>
-					  		<font color="#33a5ba"><a href="/blog/${blog.id}.do">评论</a><font color="#999">(${blog.replyHit })</font>&nbsp;&nbsp;</font>  	
+					  		<font color="#999">${blog.releaseDate?string('yyyy-MM-dd HH:mm:ss') }</font> &nbsp;&nbsp;
+					  		<font color="#33a5ba">阅读<font color="#999">(${blog.clickHit })</font>&nbsp;&nbsp;</font>
+					  		<font color="#33a5ba">评论<font color="#999">(${blog.replyHit })</font>&nbsp;&nbsp;</font>  	
 					  	</span>
 					</li>
 					<hr style="height:5px;border:none;border-top:1px dashed gray;padding-bottom:10px;" />	

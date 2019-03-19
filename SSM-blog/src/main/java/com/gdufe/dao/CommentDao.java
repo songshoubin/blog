@@ -4,6 +4,8 @@ import com.gdufe.entity.Comment;
 
 import java.util.List;
 import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -29,5 +31,5 @@ public interface CommentDao {
 
     List<Comment> getListByBlogId(Integer id);
 
-    int review(Integer blog_id, Integer state);
+    int review(@Param("blog_id") Integer blog_id, @Param("state")Integer state);
 }

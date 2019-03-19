@@ -59,7 +59,7 @@
     </select>
 
     <update id="review" >
-        update comment SET state=#{arg1}   where id =#{arg0}
+        update comment SET state=#{state}   where id =#{blog_id}
     </update>
 
 </mapper>

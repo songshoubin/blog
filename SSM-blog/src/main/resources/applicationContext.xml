@@ -11,11 +11,11 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 	<!-- 自动扫描包中的bean （使用注解生成实例、不然要一个个配置）-->
 	<context:component-scan base-package="com.gdufe"/>
-	
+
 	<!-- 配置数据源，使用阿里巴巴连接池Druid -->
 	<bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
 		<property value="com.mysql.jdbc.Driver" name="driverClassName"/>
-		<property value="jdbc:mysql://localhost:3306/db_blog" name="url"/>
+		<property value="jdbc:mysql://localhost:3306/db_blog?useUnicode=true&amp;characterEncoding=UTF-8" name="url"/>
 		<property value="root" name="username"/>
 		<property value="123456" name="password"/>
 	</bean>

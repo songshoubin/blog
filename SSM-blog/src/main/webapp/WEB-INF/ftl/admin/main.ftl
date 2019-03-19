@@ -118,7 +118,7 @@
 				</div>
 				<div title="系统管理"  data-options="iconCls:'icon-system'" style="padding:10px">
 				    <a href="/static/admin/link.html" class="menuA easyui-linkbutton" data-options="plain:true,iconCls:'icon-link'" style="width: 150px">友情链接管理</a>
-					<a href="#" class="menuA easyui-linkbutton" data-options="plain:true,iconCls:'icon-modifyPassword'" style="width: 150px;">修改密码</a>
+					<a href="/static/admin/changePassword.html" class="menuA easyui-linkbutton" data-options="plain:true,iconCls:'icon-modifyPassword'" style="width: 150px;">修改密码</a>
 					<a href="#" class="menuA easyui-linkbutton" data-options="plain:true,iconCls:'icon-refresh'" style="width: 150px;">刷新系统缓存</a>
 					<a href="/admin/logout.do" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-exit'" style="width: 150px;">安全退出</a>
 				</div>

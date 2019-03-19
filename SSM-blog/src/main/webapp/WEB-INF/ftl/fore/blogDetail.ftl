@@ -104,14 +104,14 @@
 									<span><font>
 											${comment?index+1}楼&nbsp;&nbsp;&nbsp;&nbsp;${comment.userIp }</font>
 										&nbsp;&nbsp;&nbsp;&nbsp;${comment.content }&nbsp;&nbsp;&nbsp;&nbsp;
-										[${comment.commentDate }] </span>
+										[${comment.commentDate?string('yyyy-MM-dd HH:mm:ss')}] </span>
 								</div>
 							<#else>
 								<div class="otherComment">
 									<span><font>
 											${comment?index+1}楼&nbsp;&nbsp;&nbsp;&nbsp;${comment.userIp }</font>
 										&nbsp;&nbsp;&nbsp;&nbsp;${comment.content }&nbsp;&nbsp;&nbsp;&nbsp;
-										[${comment.commentDate}] </span>
+										[${comment.commentDate?string('yyyy-MM-dd HH:mm:ss')}] </span>
 								</div>
 							</#if>
 					</#list>

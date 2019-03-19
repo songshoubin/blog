@@ -2,11 +2,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>图书管理系统</title>
+<title>个人博客系统</title>
 </head>
 <body>
 
-	<h1 align="center">欢迎使用图书管理系统</h1>
+	<h1 align="center">欢迎使用个人博客系统</h1>
 	<hr>
 	<br>
 	<#if msg!="" >
